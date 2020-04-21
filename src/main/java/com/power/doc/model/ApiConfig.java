@@ -23,6 +23,7 @@
 package com.power.doc.model;
 
 import com.power.common.util.CollectionUtil;
+import com.power.doc.constants.DocGlobalConstants;
 import com.power.doc.constants.DocLanguage;
 
 import java.util.List;
@@ -146,6 +147,18 @@ public class ApiConfig {
      * default show author
      */
     private boolean showAuthor = true;
+
+    /**
+     * @since 1.8.5-SNAPSHOT
+     * default show allInOneMDTempFilePath
+     */
+    private String allInOneMDTempFilePath = DocGlobalConstants.ALL_IN_ONE_MD_TPL;
+
+    /**
+     * @since 1.8.5-SNAPSHOT
+     * default show allInOneHTMLTempFilePath
+     */
+    private String allInOneHTMLTempFilePath = DocGlobalConstants.ALL_IN_ONE_HTML_TPL;
 
 
     public String getServerUrl() {
@@ -310,5 +323,21 @@ public class ApiConfig {
 
     public void setShowAuthor(boolean showAuthor) {
         this.showAuthor = showAuthor;
+    }
+
+    public String getAllInOneMDTempFilePath() {
+        return allInOneMDTempFilePath;
+    }
+
+    public void setAllInOneMDTempFilePath(String allInOneMDTempFilePath) {
+        this.allInOneMDTempFilePath = allInOneMDTempFilePath;
+    }
+
+    public String getAllInOneHTMLTempFilePath() {
+        return allInOneHTMLTempFilePath;
+    }
+
+    public void setAllInOneHTMLTempFilePath(String allInOneHTMLTempFilePath) {
+        this.allInOneHTMLTempFilePath = allInOneHTMLTempFilePath;
     }
 }
