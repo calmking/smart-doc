@@ -67,7 +67,7 @@ public class ApiDocBuilder {
         List<ApiDoc> apiDocList = docBuildTemplate.getApiData(configBuilder);
         if (config.isAllInOne()) {
             String version = config.isCoverOld() ? "" : "-V" + DateTimeUtil.long2Str(System.currentTimeMillis(), DATE_FORMAT);
-            builderTemplate.buildAllInOne(apiDocList, config, javaProjectBuilder, config.getAllInOneMDTempFilePath(), "AllInOne" + version + ".md");
+            builderTemplate.buildAllInOne(apiDocList, config, javaProjectBuilder, ALL_IN_ONE_MD_TPL, "AllInOne" + version + ".md");
         } else {
             builderTemplate.buildApiDoc(apiDocList, config, API_DOC_MD_TPL, API_EXTENSION);
             builderTemplate.buildErrorCodeDoc(config, ERROR_CODE_LIST_MD_TPL, ERROR_CODE_LIST_MD);
