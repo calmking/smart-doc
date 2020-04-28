@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>smart-doc</artifactId>
     <packaging>jar</packaging>
-    <version>1.8.5-SNAPSHOT</version>
+    <version>1.8.6-SNAPSHOT</version>
 
     <name>smart-doc</name>
     <url>https://github.com/calmking/smart-doc.git</url>
