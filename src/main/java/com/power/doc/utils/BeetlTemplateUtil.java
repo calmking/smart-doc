@@ -51,17 +51,17 @@ public class BeetlTemplateUtil {
      * @param templateName template name
      * @return Beetl Template Object
      */
-    public static Template getByName(String templateName) {
-        try {
-            ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader("/template/");
-            Configuration cfg = Configuration.defaultConfiguration();
-            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
-            System.out.println(resourceLoader.getResource(""));
-            return gt.getTemplate(templateName);
-        } catch (IOException e) {
-            throw new RuntimeException("Can't get Beetl template.");
-        }
-    }
+//    public static Template getByName(String templateName) {
+//        try {
+//            ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader("/template/");
+//            Configuration cfg = Configuration.defaultConfiguration();
+//            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
+//            System.out.println(resourceLoader.getResource(""));
+//            return gt.getTemplate(templateName);
+//        } catch (IOException e) {
+//            throw new RuntimeException("Can't get Beetl template.");
+//        }
+//    }
 
     /**
      * 通过外部指定的目录地址获取 beetl模板对象

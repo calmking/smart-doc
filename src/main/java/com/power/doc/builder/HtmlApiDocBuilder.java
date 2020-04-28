@@ -77,7 +77,7 @@ public class HtmlApiDocBuilder {
         IDocBuildTemplate docBuildTemplate = new SpringBootDocBuildTemplate();
         List<ApiDoc> apiDocList = docBuildTemplate.getApiData(configBuilder);
         if (config.isAllInOne()) {
-            Template indexCssTemplate = BeetlTemplateUtil.getByName(ALL_IN_ONE_CSS);
+            Template indexCssTemplate = BeetlTemplateUtil.getByName(config,ALL_IN_ONE_CSS);
             FileUtil.nioWriteFile(indexCssTemplate.render(), config.getOutPath() + FILE_SEPARATOR + ALL_IN_ONE_CSS);
             builderTemplate.buildAllInOne(apiDocList, config, javaProjectBuilder, ALL_IN_ONE_HTML_TPL, INDEX_HTML);
         } else {
@@ -91,8 +91,8 @@ public class HtmlApiDocBuilder {
     }
 
     private static void copyCss(String outPath) {
-        Template indexCssTemplate = BeetlTemplateUtil.getByName(INDEX_CSS_TPL);
-        Template mdCssTemplate = BeetlTemplateUtil.getByName(MARKDOWN_CSS_TPL);
+        Template indexCssTemplate = BeetlTemplateUtil.getByName(null,INDEX_CSS_TPL);
+        Template mdCssTemplate = BeetlTemplateUtil.getByName(null,MARKDOWN_CSS_TPL);
         FileUtil.nioWriteFile(indexCssTemplate.render(), outPath + FILE_SEPARATOR + INDEX_CSS_TPL);
         FileUtil.nioWriteFile(mdCssTemplate.render(), outPath + FILE_SEPARATOR + MARKDOWN_CSS_TPL);
     }
@@ -105,7 +105,7 @@ public class HtmlApiDocBuilder {
      */
     private static void buildIndex(List<ApiDoc> apiDocList, ApiConfig config) {
         FileUtil.mkdirs(config.getOutPath());
-        Template indexTemplate = BeetlTemplateUtil.getByName(INDEX_TPL);
+        Template indexTemplate = BeetlTemplateUtil.getByName(config,INDEX_TPL);
         if (CollectionUtil.isEmpty(apiDocList)) {
             return;
         }
@@ -147,13 +147,13 @@ public class HtmlApiDocBuilder {
         Template htmlApiDoc;
         String strTime = DateTimeUtil.long2Str(now, DateTimeUtil.DATE_FORMAT_SECOND);
         for (ApiDoc doc : apiDocList) {
-            Template apiTemplate = BeetlTemplateUtil.getByName(API_DOC_MD_TPL);
+            Template apiTemplate = BeetlTemplateUtil.getByName(null,API_DOC_MD_TPL);
             apiTemplate.binding(TemplateVariable.DESC.getVariable(), doc.getDesc());
             apiTemplate.binding(TemplateVariable.NAME.getVariable(), doc.getName());
             apiTemplate.binding(TemplateVariable.LIST.getVariable(), doc.getList());//类名
 
             String html = MarkDownUtil.toHtml(apiTemplate.render());
-            htmlApiDoc = BeetlTemplateUtil.getByName(HTML_API_DOC_TPL);
+            htmlApiDoc = BeetlTemplateUtil.getByName(null,HTML_API_DOC_TPL);
             htmlApiDoc.binding(TemplateVariable.HTML.getVariable(), html);
             htmlApiDoc.binding(TemplateVariable.TITLE.getVariable(), doc.getDesc());
             htmlApiDoc.binding(TemplateVariable.CREATE_TIME.getVariable(), strTime);
@@ -170,10 +170,10 @@ public class HtmlApiDocBuilder {
      */
     private static void buildErrorCodeDoc(List<ApiErrorCode> errorCodeList, String outPath) {
         if (CollectionUtil.isNotEmpty(errorCodeList)) {
-            Template error = BeetlTemplateUtil.getByName(ERROR_CODE_LIST_MD_TPL);
+            Template error = BeetlTemplateUtil.getByName(null,ERROR_CODE_LIST_MD_TPL);
             error.binding(TemplateVariable.LIST.getVariable(), errorCodeList);
             String errorHtml = MarkDownUtil.toHtml(error.render());
-            Template errorCodeDoc = BeetlTemplateUtil.getByName(HTML_API_DOC_TPL);
+            Template errorCodeDoc = BeetlTemplateUtil.getByName(null,HTML_API_DOC_TPL);
             errorCodeDoc.binding(TemplateVariable.VERSION.getVariable(), now);
             errorCodeDoc.binding(TemplateVariable.TITLE.getVariable(), ERROR_CODE_LIST_EN_TITLE);
             errorCodeDoc.binding(TemplateVariable.HTML.getVariable(), errorHtml);
@@ -190,10 +190,10 @@ public class HtmlApiDocBuilder {
      */
     private static void buildDictionary(List<ApiDocDict> apiDocDictList, String outPath) {
         if (CollectionUtil.isNotEmpty(apiDocDictList)) {
-            Template template = BeetlTemplateUtil.getByName(DICT_LIST_MD_TPL);
+            Template template = BeetlTemplateUtil.getByName(null,DICT_LIST_MD_TPL);
             template.binding(TemplateVariable.DICT_LIST.getVariable(), apiDocDictList);
             String dictHtml = MarkDownUtil.toHtml(template.render());
-            Template dictTpl = BeetlTemplateUtil.getByName(HTML_API_DOC_TPL);
+            Template dictTpl = BeetlTemplateUtil.getByName(null,HTML_API_DOC_TPL);
             dictTpl.binding(TemplateVariable.VERSION.getVariable(), now);
             dictTpl.binding(TemplateVariable.TITLE.getVariable(), DICT_EN_TITLE);
             dictTpl.binding(TemplateVariable.HTML.getVariable(), dictHtml);

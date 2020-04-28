@@ -188,7 +188,7 @@ public class DocBuilderTemplate {
         FileUtil.mkdirs(config.getOutPath());
         IDocBuildTemplate docBuildTemplate = new SpringBootDocBuildTemplate();
         ApiDoc doc = docBuildTemplate.getSingleApiData(projectBuilder, controllerName);
-        Template mapper = BeetlTemplateUtil.getByName(template);
+        Template mapper = BeetlTemplateUtil.getByName(config,template);
         mapper.binding(TemplateVariable.DESC.getVariable(), doc.getDesc());
         mapper.binding(TemplateVariable.NAME.getVariable(), doc.getName());
         mapper.binding(TemplateVariable.LIST.getVariable(), doc.getList());
