@@ -108,7 +108,7 @@ public class DocBuilderTemplate {
     public void buildApiDoc(List<ApiDoc> apiDocList, ApiConfig config, String template, String fileExtension) {
         FileUtil.mkdirs(config.getOutPath());
         for (ApiDoc doc : apiDocList) {
-            Template mapper = BeetlTemplateUtil.getByName(template);
+            Template mapper = BeetlTemplateUtil.getByName(config, template);
             mapper.binding(TemplateVariable.DESC.getVariable(), doc.getDesc());
             mapper.binding(TemplateVariable.NAME.getVariable(), doc.getName());
             mapper.binding(TemplateVariable.LIST.getVariable(), doc.getList());
@@ -131,7 +131,7 @@ public class DocBuilderTemplate {
         FileUtil.mkdirs(outPath);
         List<ApiErrorCode> errorCodeList = errorCodeDictToList(config);
 
-        Template tpl = BeetlTemplateUtil.getByName(template);
+        Template tpl = BeetlTemplateUtil.getByName(config, template);
         tpl.binding(TemplateVariable.API_DOC_LIST.getVariable(), apiDocList);
         tpl.binding(TemplateVariable.ERROR_CODE_LIST.getVariable(), errorCodeList);
         tpl.binding(TemplateVariable.VERSION_LIST.getVariable(), config.getRevisionLogs());
@@ -170,7 +170,7 @@ public class DocBuilderTemplate {
      */
     public void buildErrorCodeDoc(ApiConfig config, String template, String outPutFileName) {
         List<ApiErrorCode> errorCodeList = errorCodeDictToList(config);
-        Template mapper = BeetlTemplateUtil.getByName(template);
+        Template mapper = BeetlTemplateUtil.getByName(config, template);
         mapper.binding(TemplateVariable.LIST.getVariable(), errorCodeList);
         FileUtil.nioWriteFile(mapper.render(), config.getOutPath() + FILE_SEPARATOR + outPutFileName);
     }
