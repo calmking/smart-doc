@@ -76,7 +76,7 @@ public class BeetlTemplateUtil {
         try {
             String templateDir = config.getTemplateDir();
             if (StringUtils.isBlank(templateDir)) {
-                templateDir = "/template/";
+                return getByName(templateName);
             }
             ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader(templateDir);
             Configuration cfg = Configuration.defaultConfiguration();
