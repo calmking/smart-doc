@@ -142,6 +142,11 @@ public class ApiConfig {
      */
     private boolean showAuthor = true;
 
+    /**
+     * 外部模板目录
+     */
+    private String templateDir;
+
 
     public String getServerUrl() {
         return serverUrl;
@@ -297,5 +302,13 @@ public class ApiConfig {
 
     public void setShowAuthor(boolean showAuthor) {
         this.showAuthor = showAuthor;
+    }
+
+    public String getTemplateDir() {
+        return templateDir;
+    }
+
+    public void setTemplateDir(String templateDir) {
+        this.templateDir = templateDir;
     }
 }
