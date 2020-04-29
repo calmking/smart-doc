@@ -78,22 +78,21 @@ public class BeetlTemplateUtil {
             if (StringUtils.isBlank(templateDir)) {
                 return getByName(templateName);
             }
-            ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader(templateDir);
-            Configuration cfg = Configuration.defaultConfiguration();
-            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
-            System.out.println(resourceLoader.getResource(""));
-            return gt.getTemplate(templateName);
-            //将windows中的双反斜杠 修改成 正斜杠
-//            templateDir = templateDir.replace("\\", "/").trim();
-//            if (templateDir.charAt(templateDir.length() - 1) != '/') {
-//                //不是以斜杠结尾 补全斜杠
-//                templateDir += "/";
-//            }
-//
-//            ResourceLoader resourceLoader = new FileResourceLoader(templateDir);
+//            ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader(templateDir);
 //            Configuration cfg = Configuration.defaultConfiguration();
 //            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
+//            System.out.println(resourceLoader.getResource(""));
 //            return gt.getTemplate(templateName);
+            //将windows中的双反斜杠 修改成 正斜杠
+            templateDir = templateDir.replaceAll("\\\\", File.separator).trim();
+            if (templateDir.endsWith(File.separator)) {
+                //不是以斜杠结尾 补全斜杠
+                templateDir += File.separator;
+            }
+            ResourceLoader resourceLoader = new FileResourceLoader(templateDir);
+            Configuration cfg = Configuration.defaultConfiguration();
+            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
+            return gt.getTemplate(templateName);
         } catch (IOException e) {
             throw new RuntimeException("Can't get Beetl template.");
         }
