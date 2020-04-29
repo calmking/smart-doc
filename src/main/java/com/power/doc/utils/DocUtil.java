@@ -193,7 +193,7 @@ public class DocUtil {
      * @return boolean
      */
     public static boolean isClassName(String className) {
-        if (StringUtil.isEmpty(className) || !className.contains(".")) {
+       /* if (StringUtil.isEmpty(className) || !className.contains(".")) {
             return false;
         }
         if (ValidateUtil.isContainsChinese(className)) {
@@ -212,7 +212,17 @@ public class DocUtil {
         } else if (className.contains(">") && !className.contains("<")) {
             return false;
         }
-        return true;
+        return true;*/
+        if (StringUtil.isEmpty(className)) {
+            return false;
+        }
+        if (className.contains("<") && !className.contains(">")) {
+            return false;
+        } else if (className.contains(">") && !className.contains("<")) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
