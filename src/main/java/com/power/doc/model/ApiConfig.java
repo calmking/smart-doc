@@ -23,6 +23,7 @@
 package com.power.doc.model;
 
 import com.power.common.util.CollectionUtil;
+import com.power.doc.constants.DocGlobalConstants;
 import com.power.doc.constants.DocLanguage;
 import com.power.doc.model.rpc.RpcApiDependency;
 
@@ -159,6 +160,24 @@ public class ApiConfig {
      */
     private boolean showAuthor = true;
 
+    /**
+     * @since 1.8.5-SNAPSHOT
+     * default show allInOneMDTempFilePath
+     */
+    private String allInOneMDTempFilePath = DocGlobalConstants.ALL_IN_ONE_MD_TPL;
+
+    /**
+     * @since 1.8.5-SNAPSHOT
+     * default show allInOneHTMLTempFilePath
+     */
+    private String allInOneHTMLTempFilePath = DocGlobalConstants.ALL_IN_ONE_HTML_TPL;
+
+    /**
+     * 外部模板目录
+     * @since 1.8.6
+     * @author long.fu
+     */
+    private String templateDir;
     /**
      * convert request field to underline
      *
@@ -524,5 +543,29 @@ public class ApiConfig {
 
     public void setIgnoreRequestParams(List<String> ignoreRequestParams) {
         this.ignoreRequestParams = ignoreRequestParams;
+    }
+    public String getTemplateDir() {
+        return templateDir;
+    }
+
+    public void setTemplateDir(String templateDir) {
+        this.templateDir = templateDir;
+    }
+
+
+    public String getAllInOneMDTempFilePath() {
+        return allInOneMDTempFilePath;
+    }
+
+    public void setAllInOneMDTempFilePath(String allInOneMDTempFilePath) {
+        this.allInOneMDTempFilePath = allInOneMDTempFilePath;
+    }
+
+    public String getAllInOneHTMLTempFilePath() {
+        return allInOneHTMLTempFilePath;
+    }
+
+    public void setAllInOneHTMLTempFilePath(String allInOneHTMLTempFilePath) {
+        this.allInOneHTMLTempFilePath = allInOneHTMLTempFilePath;
     }
 }
