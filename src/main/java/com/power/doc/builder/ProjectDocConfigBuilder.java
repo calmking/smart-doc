@@ -1,7 +1,7 @@
 /*
  * smart-doc https://github.com/shalousun/smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -32,10 +32,7 @@ import com.thoughtworks.qdox.JavaProjectBuilder;
 import com.thoughtworks.qdox.model.JavaClass;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.power.doc.constants.DocGlobalConstants.DEFAULT_SERVER_URL;
@@ -51,7 +48,9 @@ public class ProjectDocConfigBuilder {
 
     private Map<String, CustomRespField> customRespFieldMap = new ConcurrentHashMap<>();
 
-    private Map<String,String> replaceClassMap = new ConcurrentHashMap<>();
+    private Map<String, String> replaceClassMap = new ConcurrentHashMap<>();
+
+    private Map<String, String> constantsMap = new ConcurrentHashMap<>();
 
     private String serverUrl;
 
@@ -78,6 +77,22 @@ public class ProjectDocConfigBuilder {
         this.initClassFilesMap();
         this.initCustomResponseFieldsMap(apiConfig);
         this.initReplaceClassMap(apiConfig);
+        this.initConstants(apiConfig);
+    }
+
+    public JavaClass getClassByName(String simpleName) {
+        JavaClass cls = javaProjectBuilder.getClassByName(simpleName);
+        List<DocJavaField> fieldList = JavaClassUtil.getFields(cls, 0, new HashSet<>());
+        // handle inner class
+        if (Objects.isNull(cls.getFields()) || fieldList.isEmpty()) {
+            cls = classFilesMap.get(simpleName);
+        } else {
+            List<JavaClass> classList = cls.getNestedClasses();
+            for (JavaClass javaClass : classList) {
+                classFilesMap.put(javaClass.getFullyQualifiedName(), javaClass);
+            }
+        }
+        return cls;
     }
 
     private void loadJavaSource(List<SourceCodePath> paths, JavaProjectBuilder builder) {
@@ -112,28 +127,35 @@ public class ProjectDocConfigBuilder {
         }
     }
 
-    private void initReplaceClassMap(ApiConfig config){
+    private void initReplaceClassMap(ApiConfig config) {
         if (CollectionUtil.isNotEmpty(config.getApiObjectReplacements())) {
             for (ApiObjectReplacement replace : config.getApiObjectReplacements()) {
-                replaceClassMap.put(replace.getClassName(),replace.getReplacementClassName());
+                replaceClassMap.put(replace.getClassName(), replace.getReplacementClassName());
             }
         }
     }
 
-
-    public JavaClass getClassByName(String simpleName) {
-        JavaClass cls = javaProjectBuilder.getClassByName(simpleName);
-        List<DocJavaField> fieldList = JavaClassUtil.getFields(cls, 0);
-        // handle inner class
-        if (Objects.isNull(cls.getFields()) || fieldList.isEmpty()) {
-            cls = classFilesMap.get(simpleName);
+    private void initConstants(ApiConfig config) {
+        List<ApiConstant> apiConstants;
+        if (CollectionUtil.isEmpty(config.getApiConstants())) {
+            apiConstants = new ArrayList<>();
         } else {
-            List<JavaClass> classList = cls.getNestedClasses();
-            for (JavaClass javaClass : classList) {
-                classFilesMap.put(javaClass.getFullyQualifiedName(), javaClass);
-            }
+            apiConstants = config.getApiConstants();
         }
-        return cls;
+        try {
+            for (ApiConstant apiConstant : apiConstants) {
+                Class<?> clzz = apiConstant.getConstantsClass();
+                if (Objects.isNull(clzz)) {
+                    if (StringUtil.isEmpty(apiConstant.getConstantsClassName())) {
+                        throw new RuntimeException("Enum class name can't be null.");
+                    }
+                    clzz = Class.forName(apiConstant.getConstantsClassName());
+                }
+                constantsMap.putAll(JavaClassUtil.getFinalFieldValue(clzz));
+            }
+        } catch (ClassNotFoundException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -161,5 +183,9 @@ public class ProjectDocConfigBuilder {
 
     public Map<String, String> getReplaceClassMap() {
         return replaceClassMap;
+    }
+
+    public Map<String, String> getConstantsMap() {
+        return constantsMap;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,6 +21,11 @@
  * under the License.
  */
 package com.power.doc.utils;
+
+import com.power.common.util.CollectionUtil;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author yu 2019/12/25.
@@ -62,6 +67,9 @@ public class JavaClassValidateUtil {
      * @return boolean
      */
     public static boolean isPrimitive(String type0) {
+        if (Objects.isNull(type0)) {
+            return true;
+        }
         String type = type0.contains("java.lang") ? type0.substring(type0.lastIndexOf(".") + 1, type0.length()) : type0;
         type = type.toLowerCase();
         switch (type) {
@@ -102,23 +110,14 @@ public class JavaClassValidateUtil {
     public static boolean isCollection(String type) {
         switch (type) {
             case "java.util.List":
-                return true;
             case "java.util.LinkedList":
-                return true;
             case "java.util.ArrayList":
-                return true;
             case "java.util.Set":
-                return true;
             case "java.util.TreeSet":
-                return true;
             case "java.util.HashSet":
-                return true;
             case "java.util.SortedSet":
-                return true;
             case "java.util.Collection":
-                return true;
             case "java.util.ArrayDeque":
-                return true;
             case "java.util.PriorityQueue":
                 return true;
             default:
@@ -135,21 +134,13 @@ public class JavaClassValidateUtil {
     public static boolean isMap(String type) {
         switch (type) {
             case "java.util.Map":
-                return true;
             case "java.util.SortedMap":
-                return true;
             case "java.util.TreeMap":
-                return true;
             case "java.util.LinkedHashMap":
-                return true;
             case "java.util.HashMap":
-                return true;
             case "java.util.concurrent.ConcurrentHashMap":
-                return true;
             case "java.util.concurrent.ConcurrentMap":
-                return true;
             case "java.util.Properties":
-                return true;
             case "java.util.Hashtable":
                 return true;
             default:
@@ -220,9 +211,13 @@ public class JavaClassValidateUtil {
      * ignore param of spring mvc
      *
      * @param paramType param type name
+     * @param ignoreParams ignore param list
      * @return boolean
      */
-    public static boolean isMvcIgnoreParams(String paramType) {
+    public static boolean isMvcIgnoreParams(String paramType, List<String> ignoreParams) {
+        if (CollectionUtil.isNotEmpty(ignoreParams) && ignoreParams.contains(paramType)) {
+            return true;
+        }
         switch (paramType) {
             case "org.springframework.ui.Model":
             case "org.springframework.ui.ModelMap":
@@ -232,6 +227,8 @@ public class JavaClassValidateUtil {
             case "org.springframework.web.context.request.WebRequest":
             case "javax.servlet.http.HttpSession":
             case "javax.servlet.http.HttpServletResponse":
+            case "org.springframework.web.reactive.function.server.ServerRequest":
+            case "org.springframework.web.multipart.MultipartHttpServletRequest":
                 return true;
             default:
                 return false;
@@ -247,7 +244,6 @@ public class JavaClassValidateUtil {
     public static boolean isIgnoreFieldTypes(String typeName) {
         switch (typeName) {
             case "org.slf4j.Logger":
-                return true;
             case "org.apache.ibatis.logging.Log":
                 return true;
             default:

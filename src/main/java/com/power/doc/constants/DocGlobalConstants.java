@@ -31,13 +31,19 @@ public interface DocGlobalConstants {
 
     String ERROR_CODE_LIST_MD_TPL = "ErrorCodeList.btl";
 
-    String ERROR_CODE_LIST_ADOC_TPL = "ErrorCodeList.btl";
+    String ERROR_CODE_LIST_ADOC_TPL = "ErrorCodeList.adoc";
 
     String ERROR_CODE_LIST_MD = "ErrorCodeList.md";
 
-    String ERROR_CODE_LIST_ADOC = "ErrorCodeList.md";
+    String ERROR_CODE_LIST_ADOC = "ErrorCodeList.adoc";
+
+    String DICT_LIST_MD = "Dictionary.md";
 
     String DICT_LIST_MD_TPL = "Dictionary.btl";
+
+    String DICT_LIST_ADOC = "Dictionary.adoc";
+
+    String DICT_LIST_ADOC_TPL = "Dictionary.btl";
 
     String INDEX_TPL = "Index.btl";
 
@@ -47,7 +53,23 @@ public interface DocGlobalConstants {
 
     String ALL_IN_ONE_CSS = "AllInOne.css";
 
+    String RPC_API_DOC_ADOC_TPL = "dubbo/Dubbo.adoc";
+
+    String RPC_ALL_IN_ONE_ADOC_TPL = "dubbo/DubboAllInOne.adoc";
+
+    String RPC_ALL_IN_ONE_HTML_TPL = "dubbo/DubboAllInOne.html";
+
+    String RPC_DEPENDENCY_MD_TPL = "dubbo/DubboApiDependency.md";
+
+    String RPC_API_DOC_MD_TPL = "dubbo/Dubbo.md";
+
+    String RPC_ALL_IN_ONE_MD_TPL = "dubbo/DubboAllInOne.md";
+
+    String RPC_INDEX_TPL = "dubbo/DubboIndex.btl";
+
     String POSTMAN_JSON = "/postman.json";
+
+    String OPEN_API_JSON = "/openApi3.0.json";
 
     String CONTROLLER_FULLY = "org.springframework.stereotype.Controller";
 
@@ -115,11 +137,15 @@ public interface DocGlobalConstants {
 
     String SHORT_REQUEST_BODY = "RequestBody";
 
-    String CURL_REQUEST_TYPE = "curl -X %s -i %s";
+    String CURL_REQUEST_TYPE = "curl -X %s %s -i %s";
 
-    String CURL_REQUEST_TYPE_DATA = "curl -X %s -i %s  --data '%s'";
+    String CURL_REQUEST_TYPE_DATA = "curl -X %s %s -i %s --data '%s'";
 
-    String CURL_POST_PUT_JSON = "curl -X %s -H 'Content-Type: application/json; charset=utf-8' -i %s --data '%s'";
+    String CURL_POST_PUT_JSON = "curl -X %s -H 'Content-Type: application/json; charset=utf-8' %s -i %s --data '%s'";
 
-    String ENMPTY = "";
+    String EMPTY = "";
+
+    String ENUM = "enum";
+    String YAPI_RESULT_TPL = "yapiJson.btl";
+    String YAPI_JSON="/yapi.json";
 }

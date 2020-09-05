@@ -1,7 +1,7 @@
 /*
  * smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,8 +24,10 @@ package com.power.doc.model;
 
 import com.power.common.util.CollectionUtil;
 import com.power.doc.constants.DocLanguage;
+import com.power.doc.model.rpc.RpcApiDependency;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -131,6 +133,16 @@ public class ApiConfig {
     private List<ApiObjectReplacement> apiObjectReplacements;
 
     /**
+     * list of rpc api dependencies
+     */
+    private List<RpcApiDependency> rpcApiDependencies;
+
+    /**
+     * list of api constant
+     */
+    private List<ApiConstant> apiConstants;
+
+    /**
      * @since 1.7.5
      * project name
      */
@@ -146,6 +158,87 @@ public class ApiConfig {
      * default show author
      */
     private boolean showAuthor = true;
+
+    /**
+     * convert request field to underline
+     *
+     * @since 1.8.7
+     */
+    private boolean requestFieldToUnderline;
+
+    /**
+     * convert response field to underline
+     *
+     * @since 1.8.7
+     */
+    private boolean responseFieldToUnderline;
+
+    /**
+     * sort by title
+     *
+     * @since 1.8.7
+     */
+    private boolean sortByTitle;
+
+    /**
+     * is rest api doc
+     *
+     * @since 1.8.7
+     */
+    private Boolean showJavaType = Boolean.FALSE;
+
+    /**
+     * is inline enum field comment
+     *
+     * @since 1.8.8
+     */
+    private Boolean inlineEnum = Boolean.FALSE;
+
+    /**
+     * rpc consumer config example
+     *
+     * @since 1.8.7
+     */
+    private String rpcConsumerConfig;
+
+    /**
+     * recursion limit
+     *
+     * @since 1.8.8
+     */
+    private int recursionLimit = 7;
+
+    /**
+     * request example
+     *
+     * @since 1.9.0
+     */
+    private boolean requestExample = Boolean.TRUE;
+
+    /**
+     * response example
+     *
+     * @since 1.9.0
+     */
+    private boolean responseExample = Boolean.TRUE;
+
+    /**
+     * custom setting api document name
+     *
+     * @since 1.9.0
+     */
+    private String allInOneDocFileName;
+
+    /**
+     * convert param data to tree
+     */
+    private boolean paramsDataToTree;
+
+    /**
+     * request ignore param
+     * @return
+     */
+    private List<String> ignoreRequestParams;
 
 
     public String getServerUrl() {
@@ -264,6 +357,15 @@ public class ApiConfig {
         this.dataDictionaries = CollectionUtil.asList(dataDictConfigs);
     }
 
+    public ApiDataDictionary getDataDictionary(String enumClassSimpleName) {
+        if (Objects.isNull(this.dataDictionaries)) {
+            return null;
+        }
+        return this.dataDictionaries.stream().filter((apiDataDictionary ->
+                enumClassSimpleName.equalsIgnoreCase(apiDataDictionary.getEnumClassName())))
+                .findFirst().orElse(new ApiDataDictionary());
+    }
+
     public List<ApiErrorCodeDictionary> getErrorCodeDictionaries() {
         return errorCodeDictionaries;
     }
@@ -278,6 +380,22 @@ public class ApiConfig {
 
     public void setApiObjectReplacements(ApiObjectReplacement... apiObjectReplaces) {
         this.apiObjectReplacements = CollectionUtil.asList(apiObjectReplaces);
+    }
+
+    public List<RpcApiDependency> getRpcApiDependencies() {
+        return rpcApiDependencies;
+    }
+
+    public void setRpcApiDependencies(RpcApiDependency... rpcApiDependencies) {
+        this.rpcApiDependencies = CollectionUtil.asList(rpcApiDependencies);
+    }
+
+    public List<ApiConstant> getApiConstants() {
+        return apiConstants;
+    }
+
+    public void setApiConstants(ApiConstant... apiConstants) {
+        this.apiConstants = CollectionUtil.asList(apiConstants);
     }
 
     public boolean isCoverOld() {
@@ -310,5 +428,101 @@ public class ApiConfig {
 
     public void setShowAuthor(boolean showAuthor) {
         this.showAuthor = showAuthor;
+    }
+
+    public boolean isRequestFieldToUnderline() {
+        return requestFieldToUnderline;
+    }
+
+    public void setRequestFieldToUnderline(boolean requestFieldToUnderline) {
+        this.requestFieldToUnderline = requestFieldToUnderline;
+    }
+
+    public boolean isResponseFieldToUnderline() {
+        return responseFieldToUnderline;
+    }
+
+    public void setResponseFieldToUnderline(boolean responseFieldToUnderline) {
+        this.responseFieldToUnderline = responseFieldToUnderline;
+    }
+
+    public boolean isSortByTitle() {
+        return sortByTitle;
+    }
+
+    public void setSortByTitle(boolean sortByTitle) {
+        this.sortByTitle = sortByTitle;
+    }
+
+    public Boolean getShowJavaType() {
+        return showJavaType;
+    }
+
+    public void setShowJavaType(Boolean showJavaType) {
+        this.showJavaType = showJavaType;
+    }
+
+    public String getRpcConsumerConfig() {
+        return rpcConsumerConfig;
+    }
+
+    public void setRpcConsumerConfig(String rpcConsumerConfig) {
+        this.rpcConsumerConfig = rpcConsumerConfig;
+    }
+
+    public Boolean getInlineEnum() {
+        return inlineEnum;
+    }
+
+    public void setInlineEnum(Boolean inlineEnum) {
+        this.inlineEnum = inlineEnum;
+    }
+
+    public int getRecursionLimit() {
+        return recursionLimit;
+    }
+
+    public void setRecursionLimit(int recursionLimit) {
+        this.recursionLimit = recursionLimit;
+    }
+
+    public boolean isRequestExample() {
+        return requestExample;
+    }
+
+    public void setRequestExample(boolean requestExample) {
+        this.requestExample = requestExample;
+    }
+
+    public boolean isResponseExample() {
+        return responseExample;
+    }
+
+    public void setResponseExample(boolean responseExample) {
+        this.responseExample = responseExample;
+    }
+
+    public String getAllInOneDocFileName() {
+        return allInOneDocFileName;
+    }
+
+    public void setAllInOneDocFileName(String allInOneDocFileName) {
+        this.allInOneDocFileName = allInOneDocFileName;
+    }
+
+    public boolean isParamsDataToTree() {
+        return paramsDataToTree;
+    }
+
+    public void setParamsDataToTree(boolean paramsDataToTree) {
+        this.paramsDataToTree = paramsDataToTree;
+    }
+
+    public List<String> getIgnoreRequestParams() {
+        return ignoreRequestParams;
+    }
+
+    public void setIgnoreRequestParams(List<String> ignoreRequestParams) {
+        this.ignoreRequestParams = ignoreRequestParams;
     }
 }
