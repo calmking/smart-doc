@@ -57,7 +57,6 @@ public class BeetlTemplateUtil {
             Configuration cfg = Configuration.defaultConfiguration();
             cfg.add("/smart-doc-beetl.properties");
             GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
-            System.out.println(resourceLoader.getResource(""));
             return gt.getTemplate(templateName);
         } catch (IOException e) {
             throw new RuntimeException("Can't get Beetl template.");
@@ -77,19 +76,15 @@ public class BeetlTemplateUtil {
         try {
             String templateDir = config.getTemplateDir();
             if (StringUtils.isBlank(templateDir)) {
-                return getByName(templateName);
+                templateDir = "/template/";
             }
-//            ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader(templateDir);
-//            Configuration cfg = Configuration.defaultConfiguration();
-//            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
-//            System.out.println(resourceLoader.getResource(""));
-//            return gt.getTemplate(templateName);
             //将windows中的双反斜杠 修改成 正斜杠
-            templateDir = templateDir.replaceAll("\\\\", File.separator).trim();
-            if (templateDir.endsWith(File.separator)) {
+            templateDir = templateDir.replace("\\", "/").trim();
+            if (templateDir.charAt(templateDir.length() - 1) != '/') {
                 //不是以斜杠结尾 补全斜杠
-                templateDir += File.separator;
+                templateDir += "/";
             }
+
             ResourceLoader resourceLoader = new FileResourceLoader(templateDir);
             Configuration cfg = Configuration.defaultConfiguration();
             GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
@@ -98,7 +93,6 @@ public class BeetlTemplateUtil {
             throw new RuntimeException("Can't get Beetl template.");
         }
     }
-
 
     /**
      * Batch bind binding value to Beetl templates and return all file rendered,

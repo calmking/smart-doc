@@ -240,6 +240,12 @@ public class ApiConfig {
      */
     private List<String> ignoreRequestParams;
 
+    /** 外部模板目录
+     * @since 1.8.6
+     * @author long.fu
+     */
+    private String templateDir;
+
 
     public String getServerUrl() {
         return serverUrl;
@@ -524,5 +530,13 @@ public class ApiConfig {
 
     public void setIgnoreRequestParams(List<String> ignoreRequestParams) {
         this.ignoreRequestParams = ignoreRequestParams;
+    }
+
+    public String getTemplateDir() {
+        return templateDir;
+    }
+
+    public void setTemplateDir(String templateDir) {
+        this.templateDir = templateDir;
     }
 }
