@@ -23,10 +23,14 @@
 package com.power.doc.utils;
 
 import com.power.common.util.FileUtil;
+import com.power.doc.model.ApiConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
+import org.beetl.core.ResourceLoader;
 import org.beetl.core.Template;
 import org.beetl.core.resource.ClasspathResourceLoader;
+import org.beetl.core.resource.FileResourceLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,11 +57,48 @@ public class BeetlTemplateUtil {
             Configuration cfg = Configuration.defaultConfiguration();
             cfg.add("/smart-doc-beetl.properties");
             GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
+            System.out.println(resourceLoader.getResource(""));
             return gt.getTemplate(templateName);
         } catch (IOException e) {
             throw new RuntimeException("Can't get Beetl template.");
         }
     }
+
+    /**
+     * 通过外部指定的目录地址获取 beetl模板对象
+     *
+     * @param config
+     * @param templateName
+     * @return
+     * @author long.fu
+     * @since 1.8.6
+     */
+    public static Template getByName(ApiConfig config, String templateName) {
+        try {
+            String templateDir = config.getTemplateDir();
+            if (StringUtils.isBlank(templateDir)) {
+                return getByName(templateName);
+            }
+//            ClasspathResourceLoader resourceLoader = new ClasspathResourceLoader(templateDir);
+//            Configuration cfg = Configuration.defaultConfiguration();
+//            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
+//            System.out.println(resourceLoader.getResource(""));
+//            return gt.getTemplate(templateName);
+            //将windows中的双反斜杠 修改成 正斜杠
+            templateDir = templateDir.replaceAll("\\\\", File.separator).trim();
+            if (templateDir.endsWith(File.separator)) {
+                //不是以斜杠结尾 补全斜杠
+                templateDir += File.separator;
+            }
+            ResourceLoader resourceLoader = new FileResourceLoader(templateDir);
+            Configuration cfg = Configuration.defaultConfiguration();
+            GroupTemplate gt = new GroupTemplate(resourceLoader, cfg);
+            return gt.getTemplate(templateName);
+        } catch (IOException e) {
+            throw new RuntimeException("Can't get Beetl template.");
+        }
+    }
+
 
     /**
      * Batch bind binding value to Beetl templates and return all file rendered,
