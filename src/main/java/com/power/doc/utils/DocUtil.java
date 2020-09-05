@@ -1,7 +1,7 @@
 /*
  * smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -26,6 +26,7 @@ import com.github.javafaker.Faker;
 import com.power.common.util.*;
 import com.power.doc.constants.DocAnnotationConstants;
 import com.power.doc.constants.DocGlobalConstants;
+import com.power.doc.model.DocJavaField;
 import com.power.doc.model.FormData;
 import com.thoughtworks.qdox.model.DocletTag;
 import com.thoughtworks.qdox.model.JavaAnnotation;
@@ -289,8 +290,6 @@ public class DocUtil {
         switch (method) {
             case "RequestMethod.POST":
                 return "POST";
-            case "RequestMethod.GET":
-                return "GET";
             case "RequestMethod.PUT":
                 return "PUT";
             case "RequestMethod.DELETE":
@@ -365,11 +364,15 @@ public class DocUtil {
     /**
      * Get field tags
      *
-     * @param field JavaField
+     * @param field        JavaField
+     * @param docJavaField DocJavaField
      * @return map
      */
-    public static Map<String, String> getFieldTagsValue(final JavaField field) {
+    public static Map<String, String> getFieldTagsValue(final JavaField field, DocJavaField docJavaField) {
         List<DocletTag> paramTags = field.getTags();
+        if (CollectionUtil.isEmpty(paramTags) && Objects.nonNull(docJavaField)) {
+            paramTags = docJavaField.getDocletTags();
+        }
         return paramTags.stream().collect(Collectors.toMap(DocletTag::getName, DocletTag::getValue,
                 (key1, key2) -> key1 + "," + key2));
     }
@@ -463,6 +466,26 @@ public class DocUtil {
                 return true;
             default:
                 return false;
+        }
+    }
+
+    public static String javaTypeToOpenApiTypeConvert(String type){
+        switch (type) {
+            case "int32":
+            case "int16":
+                return "integer";
+            case "int64":
+                return "long";
+            case "double":
+            case "float":
+            case "number":
+                return "number";
+            case "boolean":
+                return "boolean";
+            case "string":
+                return "string";
+            default:
+                return "object"; //array object file
         }
     }
 }

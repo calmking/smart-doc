@@ -1,7 +1,7 @@
 /*
  * smart-doc https://github.com/shalousun/smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,10 +22,9 @@
  */
 package com.power.doc.model.postman;
 
+import com.power.common.util.DateTimeUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 /**
@@ -39,7 +38,7 @@ public class InfoBean {
 
     public InfoBean(String name) {
         if (StringUtils.isBlank(name)) {
-            this.name = "smart-doc    " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-DD HH:MM:SS"));
+            this.name = "smart-doc    " + DateTimeUtil.long2Str(System.currentTimeMillis(),DateTimeUtil.DATE_FORMAT_SECOND);
         } else {
             this.name = name;
         }

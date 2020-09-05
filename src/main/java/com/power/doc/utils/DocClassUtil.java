@@ -1,7 +1,7 @@
 /*
  * smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,6 +28,7 @@ import com.power.doc.model.ApiReturn;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Description:
@@ -89,7 +90,7 @@ public class DocClassUtil {
         for (int i = 0; i < length; i++) {
             if (classes.size() > 0) {
                 int index = classes.size() - 1;
-                if (!DocUtil.isClassName(classes.get(index))) {
+                if (!isClassName(classes.get(index))) {
                     globIndex = globIndex + 1;
                     if (globIndex < length) {
                         indexList.add(globIndex);
@@ -99,7 +100,7 @@ public class DocClassUtil {
                 } else {
                     globIndex = globIndex + 1;
                     if (globIndex < length) {
-                        if (DocUtil.isClassName(arr[globIndex])) {
+                        if (isClassName(arr[globIndex])) {
                             indexList.add(globIndex);
                             classes.add(arr[globIndex]);
                         } else {
@@ -113,7 +114,7 @@ public class DocClassUtil {
                     }
                 }
             } else {
-                if (DocUtil.isClassName(arr[i])) {
+                if (isClassName(arr[i])) {
                     indexList.add(i);
                     classes.add(arr[i]);
                 } else {
@@ -167,59 +168,42 @@ public class DocClassUtil {
         }
         switch (javaTypeName) {
             case "java.lang.String":
-                return "string";
             case "string":
-                return "string";
             case "char":
+            case "java.util.Byte":
+            case "byte":
+            case "date":
+            case "localdatetime":
+            case "localdate":
+            case "localtime":
+            case "timestamp":
                 return "string";
             case "java.util.List":
-                return "array";
             case "list":
                 return "array";
             case "java.lang.Integer":
-                return "int32";
             case "integer":
-                return "int32";
             case "int":
                 return "int32";
             case "short":
-                return "int16";
             case "java.lang.Short":
                 return "int16";
             case "double":
                 return "double";
             case "java.lang.Long":
-                return "int64";
             case "long":
                 return "int64";
             case "java.lang.Float":
-                return "float";
             case "float":
                 return "float";
             case "bigdecimal":
-                return "number";
             case "biginteger":
                 return "number";
             case "java.lang.Boolean":
-                return "boolean";
             case "boolean":
                 return "boolean";
-            case "java.util.Byte":
-                return "string";
-            case "byte":
-                return "string";
             case "map":
                 return "map";
-            case "date":
-                return "string";
-            case "localdatetime":
-                return "string";
-            case "localdate":
-                return "string";
-            case "localtime":
-                return "string";
-            case "timestamp":
-                return "string";
             case "multipartfile":
                 return "file";
             default:
@@ -253,5 +237,18 @@ public class DocClassUtil {
             default:
                 return typeName;
         }
+    }
+
+    private static boolean isClassName(String className) {
+        className = className.replaceAll("[^<>]", "");
+        Stack<Character> stack = new Stack<>();
+        for (char c : className.toCharArray()) {
+            if (c == '<') {
+                stack.push('>');
+            } else if (stack.isEmpty() || c != stack.pop()) {
+                return false;
+            }
+        }
+        return stack.isEmpty();
     }
 }

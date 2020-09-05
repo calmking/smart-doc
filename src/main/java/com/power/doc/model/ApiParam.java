@@ -1,7 +1,7 @@
 /*
  * smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,10 +22,18 @@
  */
 package com.power.doc.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author yu 2019/9/27.
  */
 public class ApiParam {
+
+    /**
+     * field id
+     */
+    private int id = 1;
 
     /**
      * field
@@ -51,6 +59,21 @@ public class ApiParam {
      * version
      */
     private String version;
+
+    /**
+     * field pid
+     */
+    private int pid;
+
+    /**
+     * PathVariableParams flag
+     */
+    private boolean isPathParams;
+
+    /**
+     * children params
+     */
+    private List<ApiParam> children;
 
     public static ApiParam of(){
         return new ApiParam();
@@ -98,6 +121,42 @@ public class ApiParam {
 
     public ApiParam setVersion(String version) {
         this.version = version;
+        return this;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public ApiParam setId(int id) {
+        this.id = id;
+        return this;
+    }
+
+    public int getPid() {
+        return pid;
+    }
+
+    public ApiParam setPid(int pid) {
+        this.pid = pid;
+        return this;
+    }
+
+    public List<ApiParam> getChildren() {
+        return children;
+    }
+
+    public boolean isPathParams() {
+        return isPathParams;
+    }
+
+    public ApiParam setPathParams(boolean pathParams) {
+        isPathParams = pathParams;
+        return this;
+    }
+
+    public ApiParam setChildren(List<ApiParam> children) {
+        this.children = children;
         return this;
     }
 }

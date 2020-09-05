@@ -1,7 +1,7 @@
 /*
  * smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -31,13 +31,14 @@ import com.power.doc.model.DocJavaField;
 import com.thoughtworks.qdox.model.*;
 import com.thoughtworks.qdox.model.expression.AnnotationValue;
 import com.thoughtworks.qdox.model.expression.AnnotationValueList;
+import com.thoughtworks.qdox.model.expression.Expression;
 import com.thoughtworks.qdox.model.expression.TypeRef;
 import com.thoughtworks.qdox.model.impl.DefaultJavaField;
 import com.thoughtworks.qdox.model.impl.DefaultJavaParameterizedType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
 /**
  * Handle JavaClass
@@ -49,17 +50,18 @@ public class JavaClassUtil {
     /**
      * Get fields
      *
-     * @param cls1 The JavaClass object
-     * @param i    Recursive counter
+     * @param cls1        The JavaClass object
+     * @param counter     Recursive counter
+     * @param addedFields added fields,Field deduplication
      * @return list of JavaField
      */
-    public static List<DocJavaField> getFields(JavaClass cls1, int i) {
+    public static List<DocJavaField> getFields(JavaClass cls1, int counter, Set<String> addedFields) {
         List<DocJavaField> fieldList = new ArrayList<>();
         if (null == cls1) {
             return fieldList;
         } else if ("Object".equals(cls1.getSimpleName()) || "Timestamp".equals(cls1.getSimpleName()) ||
                 "Date".equals(cls1.getSimpleName()) || "Locale".equals(cls1.getSimpleName())
-                || "ClassLoader".equals(cls1.getSimpleName())) {
+                || "ClassLoader".equals(cls1.getSimpleName()) || JavaClassValidateUtil.isMap(cls1.getFullyQualifiedName())) {
             return fieldList;
         } else {
             String className = cls1.getFullyQualifiedName();
@@ -69,23 +71,47 @@ public class JavaClassUtil {
                 List<JavaMethod> methods = cls1.getMethods();
                 for (JavaMethod javaMethod : methods) {
                     String methodName = javaMethod.getName();
-                    if (!methodName.startsWith("get")) {
+                    int paramSize = javaMethod.getParameters().size();
+                    boolean enable = false;
+                    if (methodName.startsWith("get") && !"get".equals(methodName) && paramSize == 0) {
+                        methodName = StringUtil.firstToLowerCase(methodName.substring(3, methodName.length()));
+                        enable = true;
+                    } else if (methodName.startsWith("is") && !"is".equals(methodName) && paramSize == 0) {
+                        methodName = StringUtil.firstToLowerCase(methodName.substring(2, methodName.length()));
+                        enable = true;
+                    }
+                    if (!enable) {
                         continue;
                     }
-                    methodName = StringUtil.firstToLowerCase(methodName.substring(3, methodName.length()));
+                    addedFields.add(methodName);
                     String comment = javaMethod.getComment();
                     JavaField javaField = new DefaultJavaField(javaMethod.getReturns(), methodName);
-                    DocJavaField docJavaField = DocJavaField.builder().setJavaField(javaField).setComment(comment);
+                    DocJavaField docJavaField = DocJavaField.builder()
+                            .setJavaField(javaField)
+                            .setComment(comment)
+                            .setDocletTags(javaMethod.getTags())
+                            .setAnnotations(javaMethod.getAnnotations());
+
                     fieldList.add(docJavaField);
                 }
             }
             // ignore enum parent class
             if (!cls1.isEnum()) {
                 JavaClass parentClass = cls1.getSuperJavaClass();
-                fieldList.addAll(getFields(parentClass, i));
+                fieldList.addAll(getFields(parentClass, counter, addedFields));
+                List<JavaType> implClasses = cls1.getImplements();
+                for (JavaType type : implClasses) {
+                    JavaClass javaClass = (JavaClass) type;
+                    fieldList.addAll(getFields(javaClass, counter, addedFields));
+                }
             }
             List<DocJavaField> docJavaFields = new ArrayList<>();
             for (JavaField javaField : cls1.getFields()) {
+                String fieldName = javaField.getName();
+                if (addedFields.contains(fieldName)) {
+                    continue;
+                }
+                addedFields.add(fieldName);
                 docJavaFields.add(DocJavaField.builder().setComment(javaField.getComment()).setJavaField(javaField));
             }
             fieldList.addAll(docJavaFields);
@@ -117,12 +143,8 @@ public class JavaClassUtil {
             String simpleName = javaField.getType().getSimpleName();
             StringBuilder valueBuilder = new StringBuilder();
             valueBuilder.append("\"").append(javaField.getName()).append("\"").toString();
-            if (formDataEnum) {
-                value = valueBuilder.toString();
-                return value;
-            }
             if (!JavaClassValidateUtil.isPrimitive(simpleName) && index < 1) {
-                if (null != javaField.getEnumConstantArguments() && annotation > 0) {
+                if (!CollectionUtil.isEmpty(javaField.getEnumConstantArguments())) {
                     value = javaField.getEnumConstantArguments().get(0);
                 } else {
                     value = valueBuilder.toString();
@@ -131,6 +153,30 @@ public class JavaClassUtil {
             index++;
         }
         return value;
+    }
+
+    public static String getEnumParams(JavaClass javaClass) {
+
+        List<JavaField> javaFields = javaClass.getEnumConstants();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (JavaField javaField : javaFields) {
+            List<Expression> exceptions = javaField.getEnumConstantArguments();
+            stringBuilder.append(javaField.getName());
+            //如果枚举值不为空
+            if (!CollectionUtil.isEmpty(exceptions)) {
+                stringBuilder.append(" -(");
+                for (int i = 0; i < exceptions.size(); i++) {
+                    stringBuilder.append(exceptions.get(i));
+                    if (i != exceptions.size() - 1) {
+                        stringBuilder.append(",");
+                    }
+                }
+
+                stringBuilder.append(")");
+            }
+            stringBuilder.append("<br/>");
+        }
+        return stringBuilder.toString();
     }
 
 
@@ -154,6 +200,10 @@ public class JavaClassUtil {
         if (className.contains(".")) {
             int index = className.lastIndexOf(".");
             className = className.substring(index + 1, className.length());
+        }
+        if (className.contains("[")) {
+            int index = className.indexOf("[");
+            className = className.substring(0, index);
         }
         return className;
     }
@@ -220,6 +270,11 @@ public class JavaClassUtil {
         List<String> validates = DocValidatorAnnotationEnum.listValidatorAnnotations();
         List<AnnotationValue> annotationValueList = getAnnotationValues(validates, javaAnnotation);
         addGroupClass(annotationValueList, javaClassList);
+        String simpleAnnotationName = javaAnnotation.getType().getValue();
+        // add default group
+        if (javaClassList.size() == 0 && JavaClassValidateUtil.isJSR303Required(simpleAnnotationName)) {
+            javaClassList.add("javax.validation.groups.Default");
+        }
         return javaClassList;
     }
 
@@ -237,6 +292,9 @@ public class JavaClassUtil {
             StringBuilder result = new StringBuilder();
             List<DocletTag> tags = cls.getTags();
             for (int i = 0; i < tags.size(); i++) {
+                if (!tagName.equals(tags.get(i).getName())) {
+                    continue;
+                }
                 String value = tags.get(i).getValue();
                 if (StringUtil.isEmpty(value) && checkComments) {
                     throw new RuntimeException("ERROR: #" + cls.getName()
@@ -252,6 +310,27 @@ public class JavaClassUtil {
             return result.toString();
         }
         return null;
+    }
+
+    /**
+     * Get Map of final field and value
+     *
+     * @param clazz Java class
+     * @return Map
+     * @throws IllegalAccessException IllegalAccessException
+     */
+    public static Map<String, String> getFinalFieldValue(Class<?> clazz) throws IllegalAccessException {
+        String className = getClassSimpleName(clazz.getName());
+        Field[] fields = clazz.getDeclaredFields();
+        Map<String, String> constants = new HashMap<>();
+        for (Field field : fields) {
+            boolean isFinal = Modifier.isFinal(field.getModifiers());
+            if (isFinal) {
+                String name = field.getName();
+                constants.put(className + "." + name, String.valueOf(field.get(null)));
+            }
+        }
+        return constants;
     }
 
     private static void addGroupClass(List<AnnotationValue> annotationValueList, List<String> javaClassList) {

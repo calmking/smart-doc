@@ -1,7 +1,7 @@
 /*
  * smart-doc https://github.com/shalousun/smart-doc
  *
- * Copyright (C) 2019-2020 smart-doc
+ * Copyright (C) 2018-2020 smart-doc
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,8 +23,6 @@
 package com.power.doc.builder;
 
 import com.power.common.util.*;
-import com.power.doc.constants.DocGlobalConstants;
-import com.power.doc.constants.DocLanguage;
 import com.power.doc.constants.TemplateVariable;
 import com.power.doc.model.*;
 import com.power.doc.template.IDocBuildTemplate;
@@ -44,39 +42,9 @@ import static com.power.doc.constants.DocGlobalConstants.FILE_SEPARATOR;
 /**
  * @author yu 2019/9/26.
  */
-public class DocBuilderTemplate {
+public class DocBuilderTemplate extends BaseDocBuilderTemplate {
 
     private static long now = System.currentTimeMillis();
-
-    /**
-     * check condition and init
-     *
-     * @param config Api config
-     */
-    public void checkAndInit(ApiConfig config) {
-        this.checkAndInitForGetApiData(config);
-        if (StringUtil.isEmpty(config.getOutPath())) {
-            throw new RuntimeException("doc output path can't be null or empty");
-        }
-    }
-
-    /**
-     * check condition and init for get Data
-     *
-     * @param config Api config
-     */
-    public void checkAndInitForGetApiData(ApiConfig config) {
-        if (null == config) {
-            throw new NullPointerException("ApiConfig can't be null");
-        }
-        if (null != config.getLanguage()) {
-            System.setProperty(DocGlobalConstants.DOC_LANGUAGE, config.getLanguage().getCode());
-        } else {
-            //default is chinese
-            config.setLanguage(DocLanguage.CHINESE);
-            System.setProperty(DocGlobalConstants.DOC_LANGUAGE, DocLanguage.CHINESE.getCode());
-        }
-    }
 
     /**
      * get all api data
@@ -112,6 +80,8 @@ public class DocBuilderTemplate {
             mapper.binding(TemplateVariable.DESC.getVariable(), doc.getDesc());
             mapper.binding(TemplateVariable.NAME.getVariable(), doc.getName());
             mapper.binding(TemplateVariable.LIST.getVariable(), doc.getList());
+            mapper.binding(TemplateVariable.REQUEST_EXAMPLE.getVariable(), config.isRequestExample());
+            mapper.binding(TemplateVariable.RESPONSE_EXAMPLE.getVariable(), config.isResponseExample());
             FileUtil.nioWriteFile(mapper.render(), config.getOutPath() + FILE_SEPARATOR + doc.getName() + fileExtension);
         }
     }
@@ -138,23 +108,14 @@ public class DocBuilderTemplate {
         tpl.binding(TemplateVariable.VERSION.getVariable(), now);
         tpl.binding(TemplateVariable.CREATE_TIME.getVariable(), strTime);
         tpl.binding(TemplateVariable.PROJECT_NAME.getVariable(), config.getProjectName());
+        tpl.binding(TemplateVariable.REQUEST_EXAMPLE.getVariable(), config.isRequestExample());
+        tpl.binding(TemplateVariable.RESPONSE_EXAMPLE.getVariable(), config.isResponseExample());
         if (CollectionUtil.isEmpty(errorCodeList)) {
             tpl.binding(TemplateVariable.DICT_ORDER.getVariable(), apiDocList.size() + 1);
         } else {
             tpl.binding(TemplateVariable.DICT_ORDER.getVariable(), apiDocList.size() + 2);
         }
-        if (null != config.getLanguage()) {
-            if (DocLanguage.CHINESE.code.equals(config.getLanguage().getCode())) {
-                tpl.binding(TemplateVariable.ERROR_LIST_TITLE.getVariable(), DocGlobalConstants.ERROR_CODE_LIST_CN_TITLE);
-                tpl.binding(TemplateVariable.DICT_LIST_TITLE.getVariable(), DocGlobalConstants.DICT_CN_TITLE);
-            } else {
-                tpl.binding(TemplateVariable.ERROR_LIST_TITLE.getVariable(), DocGlobalConstants.ERROR_CODE_LIST_EN_TITLE);
-                tpl.binding(TemplateVariable.DICT_LIST_TITLE.getVariable(), DocGlobalConstants.DICT_EN_TITLE);
-            }
-        } else {
-            tpl.binding(TemplateVariable.ERROR_LIST_TITLE.getVariable(), DocGlobalConstants.ERROR_CODE_LIST_CN_TITLE);
-            tpl.binding(TemplateVariable.DICT_LIST_TITLE.getVariable(), DocGlobalConstants.DICT_CN_TITLE);
-        }
+        setDirectoryLanguageVariable(config, tpl);
         List<ApiDocDict> apiDocDictList = buildDictionary(config, javaProjectBuilder);
         tpl.binding(TemplateVariable.DICT_LIST.getVariable(), apiDocDictList);
         FileUtil.nioWriteFile(tpl.render(), outPath + FILE_SEPARATOR + outPutFileName);
@@ -176,6 +137,23 @@ public class DocBuilderTemplate {
     }
 
     /**
+     * build common_data doc
+     *
+     * @param config             api config
+     * @param javaProjectBuilder JavaProjectBuilder
+     * @param template           template
+     * @param outPutFileName     output file
+     */
+    public void buildDirectoryDataDoc(ApiConfig config, JavaProjectBuilder javaProjectBuilder, String template, String outPutFileName) {
+        List<ApiDocDict> directoryList = buildDictionary(config, javaProjectBuilder);
+        Template mapper = BeetlTemplateUtil.getByName(template);
+        setDirectoryLanguageVariable(config, mapper);
+        mapper.binding(TemplateVariable.DICT_LIST.getVariable(), directoryList);
+        FileUtil.nioWriteFile(mapper.render(), config.getOutPath() + FILE_SEPARATOR + outPutFileName);
+    }
+
+
+    /**
      * Generate a single controller api document
      *
      * @param projectBuilder projectBuilder
@@ -186,7 +164,7 @@ public class DocBuilderTemplate {
     public void buildSingleApi(ProjectDocConfigBuilder projectBuilder, String controllerName, String template, String fileExtension) {
         ApiConfig config = projectBuilder.getApiConfig();
         FileUtil.mkdirs(config.getOutPath());
-        IDocBuildTemplate docBuildTemplate = new SpringBootDocBuildTemplate();
+        IDocBuildTemplate<ApiDoc> docBuildTemplate = new SpringBootDocBuildTemplate();
         ApiDoc doc = docBuildTemplate.getSingleApiData(projectBuilder, controllerName);
         Template mapper = BeetlTemplateUtil.getByName(config,template);
         mapper.binding(TemplateVariable.DESC.getVariable(), doc.getDesc());
@@ -238,35 +216,6 @@ public class DocBuilderTemplate {
             e.printStackTrace();
         }
         return apiDocDictList;
-    }
-
-    private List<ApiErrorCode> errorCodeDictToList(ApiConfig config) {
-        if (CollectionUtil.isNotEmpty(config.getErrorCodes())) {
-            return config.getErrorCodes();
-        }
-        List<ApiErrorCodeDictionary> errorCodeDictionaries = config.getErrorCodeDictionaries();
-        if (CollectionUtil.isEmpty(errorCodeDictionaries)) {
-            return new ArrayList<>(0);
-        } else {
-            List<ApiErrorCode> errorCodeList = new ArrayList<>();
-            try {
-                for (ApiErrorCodeDictionary dictionary : errorCodeDictionaries) {
-                    Class<?> clzz = dictionary.getEnumClass();
-                    if (Objects.isNull(clzz)) {
-                        if (StringUtil.isEmpty(dictionary.getEnumClassName())) {
-                            throw new RuntimeException(" enum class name can't be null.");
-                        }
-                        clzz = Class.forName(dictionary.getEnumClassName());
-                    }
-                    List<ApiErrorCode> enumDictionaryList = EnumUtil.getEnumInformation(clzz, dictionary.getCodeField(),
-                            dictionary.getDescField());
-                    errorCodeList.addAll(enumDictionaryList);
-                }
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            return errorCodeList;
-        }
     }
 
     private List<ApiDoc> listOfApiData(ApiConfig config, JavaProjectBuilder javaProjectBuilder) {
